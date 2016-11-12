@@ -4,7 +4,7 @@ This video scanner module is based on David Chatting's project Arduino Eye Shiel
 Our finally purpose is adapting this scanner for reading the enviroment with competition robots like line-following or minisumo robots, but applying another microcontroller with higher proccesing speed.
 
 <p align="center">
-<img src="images/Camera driver.jpg" align = "center">
+<img src="images/Camera driver.jpg" width="500" align = "center">
 </p>
 
 ## License

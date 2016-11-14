@@ -7,6 +7,9 @@ Our finally purpose is adapting this scanner for reading the enviroment with com
 <img src="images/Camera driver.jpg" width="500" align = "center">
 </p>
 
+## Author
+[Rubén Espino San José](https://github.com/Resaj)
+
 ## License
 <p align="center">
 <img src="license/by-sa.png" align = "center">

@@ -3,6 +3,11 @@
 //---
 // Modified by Rubén Espino
 
+#include "LedControlMS.h"
+
+#define DISPLAY_LED
+//#define PROCESSING_INTERFACE
+
 #define compSyncPin 14  //A0  LM1881N:  PIN 1
 #define vertSyncPin 15  //A1            PIN 3
 #define burstPin    16  //A2            PIN 5
@@ -14,8 +19,11 @@
 #define refVoltagePin2 5
 
 #define linesInPicture 625  //PAL
-int numSamplesX = 0;
-int numSamplesY = 0;
+
+LedControl lc=LedControl(12,11,10,1); //DIN, SCK, CS, número de matrices
+
+int numSamplesX = 8;
+int numSamplesY = 8;
 
 #define STARTING       0
 #define GETTING_X_DIM  1
@@ -46,8 +54,12 @@ void setup() {
   pinMode(refVoltagePin2,OUTPUT);
   setRefVoltage(refVoltagePin1, 1.7f);
   setRefVoltage(refVoltagePin2, 3.3f);
-  
+
+#ifdef PROCESSING_INTERFACE
   Serial.begin(115200);
+
+  numSamplesX = 0;
+  numSamplesY = 0;
 
   while(init_state != INITIALIZED)
   {
@@ -93,6 +105,13 @@ void setup() {
       }
     }
   }
+#endif
+
+#ifdef DISPLAY_LED
+lc.shutdown(0,false);
+lc.setIntensity(0,8);
+lc.clearDisplay(0);
+#endif
 }
 
 void loop(){
@@ -126,8 +145,20 @@ void loop(){
 }
 
 void setLEDs(){
-  int i=0;
+#ifdef DISPLAY_LED
+  int i, j;
+  
+  for(int j=0;j<numSamplesY;++j){
+    for(int i=0;i<numSamplesX;++i){
+      if(picture[i][j] > 0)
+        lc.setLed(0,i,j,true);
+      else
+        lc.setLed(0,i,j,false);
+    }
+  }
+#endif
 
+#ifdef PROCESSING_INTERFACE
   Serial.println('S');
 
   for(int y=0;y<numSamplesY;++y){
@@ -137,6 +168,7 @@ void setLEDs(){
     Serial.println();
   }
   Serial.println();
+#endif
 }
 
 void setRefVoltage(int refVoltagePin, float v){

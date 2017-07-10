@@ -8,12 +8,25 @@
 #define DISPLAY_LED
 //#define PROCESSING_INTERFACE
 
+//#define ARDUINO_UNO
+#define ARDUINO_MEGA
+
+#ifdef ARDUINO_UNO
 #define compSyncPin 14  //A0  LM1881N:  PIN 1
 #define vertSyncPin 15  //A1            PIN 3
 #define burstPin    16  //A2            PIN 5
 #define oddEvenPin  17  //A3            PIN 7
 #define videoPin1   18  //A4
 #define videoPin2   19  //A5
+#endif
+#ifdef ARDUINO_MEGA
+#define compSyncPin 54  //A0  LM1881N:  PIN 1
+#define vertSyncPin 55  //A1            PIN 3
+#define burstPin    56  //A2            PIN 5
+#define oddEvenPin  57  //A3            PIN 7
+#define videoPin1   58  //A4
+#define videoPin2   59  //A5
+#endif
 
 #define refVoltagePin1 3
 #define refVoltagePin2 5
@@ -129,8 +142,10 @@ void loop(){
         //line=0;
         
         for(int x=0;x<numSamplesX;++x)
-          picture[x][y]=digitalRead(videoPin1) + digitalRead(videoPin2);
-          
+          picture[x][y] = /*digitalRead(videoPin1) +*/ digitalRead(videoPin2);
+//los digitalRead tienen que ser simultáneos https://www.arduino.cc/en/Reference/PortManipulation
+//ejecutando los comandos a bajo nivel se pueden conseguir muchas más muestras
+
         ++y;
       }
       ++lineCount;
@@ -138,7 +153,7 @@ void loop(){
       while(digitalRead(burstPin));
     }
     //this now happens on the odd frame...
-    
+
     setLEDs();
     lineCount=1;
   }
@@ -146,8 +161,6 @@ void loop(){
 
 void setLEDs(){
 #ifdef DISPLAY_LED
-  int i, j;
-  
   for(int j=0;j<numSamplesY;++j){
     for(int i=0;i<numSamplesX;++i){
       if(picture[i][j] > 0)
@@ -174,6 +187,5 @@ void setLEDs(){
 void setRefVoltage(int refVoltagePin, float v){
   if(v>=0 && v<=5.0){
     analogWrite(refVoltagePin,(255*v)/5);
-    analogWrite(3,(255*v)/5);
   }
 }

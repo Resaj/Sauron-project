@@ -8,25 +8,12 @@
 #define DISPLAY_LED
 //#define PROCESSING_INTERFACE
 
-//#define ARDUINO_UNO
-#define ARDUINO_MEGA
-
-#ifdef ARDUINO_UNO
 #define compSyncPin 14  //A0  LM1881N:  PIN 1
 #define vertSyncPin 15  //A1            PIN 3
 #define burstPin    16  //A2            PIN 5
 #define oddEvenPin  17  //A3            PIN 7
 #define videoPin1   18  //A4
 #define videoPin2   19  //A5
-#endif
-#ifdef ARDUINO_MEGA
-#define compSyncPin 54  //A0  LM1881N:  PIN 1
-#define vertSyncPin 55  //A1            PIN 3
-#define burstPin    56  //A2            PIN 5
-#define oddEvenPin  57  //A3            PIN 7
-#define videoPin1   58  //A4
-#define videoPin2   59  //A5
-#endif
 
 #define refVoltagePin1 3
 #define refVoltagePin2 5
@@ -130,27 +117,28 @@ lc.clearDisplay(0);
 void loop(){
   int y=0;
   
-  if(!digitalRead(oddEvenPin)){
-    while(!digitalRead(oddEvenPin));
-    while(!digitalRead(vertSyncPin));
+  if(~(1<<3)&PINC){ // if(!digitalRead(oddEvenPin)){
+    while(~(1<<3)&PINC); // while(!digitalRead(oddEvenPin));
+    while(~(1<<1)&PINC); // while(!digitalRead(vertSyncPin));
     
-    while(digitalRead(oddEvenPin)){
+    while((1<<3)&PINC){ // while(digitalRead(oddEvenPin)){
       if((lineCount%everyNthLine)==0){
         //off the shelf analogRead: takes approx 0.1 mS = 100 uS on Decimilla, but 1 line takes 64 uS - boo!
         //hacked version (16) 16 samples in 1000 17ms => 1 sample and write in 17 uS'ish => can do 3 samples of video signal
         //a digital read does 1000 samples and writes in 4mS => 4us per sample => good! => 16 samples
         //line=0;
         
-        for(int x=0;x<numSamplesX;++x)
-          picture[x][y] = /*digitalRead(videoPin1) +*/ digitalRead(videoPin2);
-//los digitalRead tienen que ser simultáneos https://www.arduino.cc/en/Reference/PortManipulation
-//ejecutando los comandos a bajo nivel se pueden conseguir muchas más muestras
+        for(int x=0;x<numSamplesX;++x){
+          char state = 0;
+          state = PINC;
+          picture[x][y] = (1<<4)&state + (1<<5)&state; // picture[x][y] = digitalRead(videoPin1) + digitalRead(videoPin2);
+        }
 
         ++y;
       }
       ++lineCount;
       
-      while(digitalRead(burstPin));
+      while((1<<2)&PINC); // while(digitalRead(burstPin));
     }
     //this now happens on the odd frame...
 
